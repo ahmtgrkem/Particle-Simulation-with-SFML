@@ -15,7 +15,6 @@ int main() {
 	Renderer renderer{ pencere };
 
 	Solver solver;
-	auto& obje = solver.objeEkle({ 420.0f, 100.0f }, 10.0f);
 
 	while (pencere.isOpen())
 	{

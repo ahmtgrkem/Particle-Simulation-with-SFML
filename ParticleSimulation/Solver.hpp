@@ -21,6 +21,7 @@ public:
 		yercekimiUygula();
 		objeleriGuncelle(alt_zaman_adimi);
 		sinirlariUygula();
+		carpismalariKontrolEt();
 		}
 	}
 
@@ -55,14 +56,19 @@ private:
 				if (i == j) continue;
 
 				Particle& obje2 = objeler[j];
-				sf::Vector2f m = obje1.konum - obje2.konum;
 
-				float mesafe = sqrt(m.x * m.x + m.y * m.y);
+				sf::Vector2f carpisma_ekseni = obje1.konum - obje2.konum;
+
+				float mesafe = sqrt(carpisma_ekseni.x * carpisma_ekseni.x + carpisma_ekseni.y * carpisma_ekseni.y) + 0.001f;
+
 				float min_mesafe = obje1.yaricap + obje2.yaricap;
 
-				if (mesafe <= min_mesafe)
+				if (mesafe < min_mesafe)
 				{
-
+					sf::Vector2f normal = carpisma_ekseni / mesafe;
+					const float delta = min_mesafe - mesafe;
+					obje1.konum += 0.5f * delta * normal;
+					obje2.konum -= 0.5f * delta * normal;
 				}
 			}
 		}
@@ -77,9 +83,10 @@ private:
 	void sinirlariUygula() {
 		float window_size = sinir_genislik;
 		for (Particle& obje : objeler) {
-			const float dampening = 0.85f;
+
 			const sf::Vector2f konum = obje.konum;
 			sf::Vector2f gecici_konum = obje.konum;
+			const float dampening = 0.85f;
 			sf::Vector2f hiz = obje.hizGetir();
 			sf::Vector2f dy = { hiz.x, -hiz.y * dampening };
 			sf::Vector2f dx = { -hiz.x * dampening , hiz.y};
