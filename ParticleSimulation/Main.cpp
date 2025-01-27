@@ -16,6 +16,13 @@ int main() {
 
 	Solver solver;
 
+	const int maksimum_obje_sayisi = 500;
+	const float obje_spawn_sıklıgı = 0.05f;
+	const sf::Vector2f obje_spawn_konumu = { 420.0f, 100.0f };
+	const sf::Vector2f obje_spawn_hizi = { 0.0f, 120.0f };
+
+	sf::Clock saat;
+
 	while (pencere.isOpen())
 	{
 		while (const std::optional olay = pencere.pollEvent())
@@ -24,6 +31,13 @@ int main() {
 				pencere.close();
 			}
 		}
+
+		if (solver.objeleriGetir().size() < maksimum_obje_sayisi && saat.getElapsedTime().asSeconds() >= obje_spawn_sıklıgı) {
+			saat.restart();
+			Particle& obje = solver.objeEkle(obje_spawn_konumu, 10);
+			solver.objeHizAta(obje, obje_spawn_hizi);
+		}
+
 
 		solver.guncelle();
 		pencere.clear(sf::Color::White);

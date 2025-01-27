@@ -30,6 +30,10 @@ public:
 		sinir_genislik = genislik;
 	}
 
+	void objeHizAta(Particle& obje, sf::Vector2f hiz) {
+		obje.hizAta(hiz, zaman_adimi);
+	}
+
 private:
 	std::vector<Particle> objeler;
 	sf::Vector2f yercekimi = { 0.0f, 1000.0f };
