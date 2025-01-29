@@ -22,7 +22,7 @@ public:
 		sf::Vector2f yer_degistirme = konum - onceki_konum;
 		onceki_konum = konum;
 		konum = konum + yer_degistirme + ivme * (dt * dt);
-		ivme = {}; // ivmeyi sıfırla
+		ivme = {};
 	}
 
 	void ivmelendir(sf::Vector2f ivme_) {

@@ -25,6 +25,7 @@
     <ClInclude Include="Particle.hpp" />
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Solver.hpp" />
+    <ClInclude Include="SpatialGrid.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

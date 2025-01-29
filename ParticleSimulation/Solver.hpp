@@ -1,5 +1,6 @@
 #pragma once
 #include "Particle.hpp"
+#include "SpatialGrid.hpp"
 #include <iostream>
 
 class Solver {
@@ -16,12 +17,17 @@ public:
 	}
 
 	void guncelle() {
+		zaman += zaman_adimi;
 		float alt_zaman_adimi = zaman_adimi / alt_adimlar;
 		for (int i = 0; i < alt_adimlar; i++) {
-		yercekimiUygula();
-		objeleriGuncelle(alt_zaman_adimi);
-		sinirlariUygula();
-		carpismalariKontrolEt();
+			grid.temizle();
+			for (auto& obje : objeler) {
+				grid.ekle(obje);
+			}
+			yercekimiUygula();
+			objeleriGuncelle(alt_zaman_adimi);
+			sinirlariUygula();
+			carpismalariKontrolEt();
 		}
 	}
 
@@ -34,10 +40,26 @@ public:
 		obje.hizAta(hiz, zaman_adimi);
 	}
 
+	float zamanGetir() const {
+		return zaman;
+	}
+
+	float zamanAdimiGetir() const {
+		return zaman_adimi / static_cast<float>(alt_adimlar);
+	}
+
+	void zamanAdimiAta(uint32_t oran) {
+		zaman_adimi = 1.0f / static_cast<float>(oran);
+	}
+
 private:
 	std::vector<Particle> objeler;
+	SpatialGrid grid{ 20.0f, 840 / 20, 840 / 20 };
 	sf::Vector2f yercekimi = { 0.0f, 1000.0f };
-	float zaman_adimi = 1.0f / 60.0f;
+
+
+	float zaman_adimi = 0.0f;
+	float zaman = 0.0f;
 	int alt_adimlar = 8;
 
 	sf::Vector2f sinir_merkezi = { 420.0f, 420.0f };
@@ -49,26 +71,19 @@ private:
 		}
 	}
 
-	void carpismalariKontrolEt()
-	{
-		int obje_sayisi = objeler.size();
-		for (int i = 0; i < obje_sayisi; i++)
-		{
-			Particle& obje1 = objeler[i];
-			for (int j = 0; j < obje_sayisi; j++)
-			{
-				if (i == j) continue;
+	void carpismalariKontrolEt() {
+		for (auto& obje1 : objeler) {
+			auto yakin_parcaciklar = grid.query(obje1.konum, obje1.yaricap * 2.0f);
 
-				Particle& obje2 = objeler[j];
+			for (auto* obje2_ptr : yakin_parcaciklar) {
+				if (&obje1 == obje2_ptr) continue;
 
+				Particle& obje2 = *obje2_ptr;
 				sf::Vector2f carpisma_ekseni = obje1.konum - obje2.konum;
-
-				float mesafe = sqrt(carpisma_ekseni.x * carpisma_ekseni.x + carpisma_ekseni.y * carpisma_ekseni.y) + 0.001f;
-
+				float mesafe = std::hypot(carpisma_ekseni.x, carpisma_ekseni.y) + 0.001f;
 				float min_mesafe = obje1.yaricap + obje2.yaricap;
 
-				if (mesafe < min_mesafe)
-				{
+				if (mesafe < min_mesafe) {
 					sf::Vector2f normal = carpisma_ekseni / mesafe;
 					const float delta = min_mesafe - mesafe;
 					obje1.konum += 0.5f * delta * normal;
@@ -96,13 +111,13 @@ private:
 			sf::Vector2f dx = { -hiz.x * dampening , hiz.y};
 			float particleSize = obje.yaricap * 2;
 
-			if (konum.x < particleSize || konum.x + particleSize > window_size) { // Kenarlardan sekme
+			if (konum.x < particleSize || konum.x + particleSize > window_size) { 
 				if (konum.x < particleSize) gecici_konum.x = particleSize;
 				if (konum.x + particleSize > window_size) gecici_konum.x = window_size - particleSize;
 				obje.konum = gecici_konum;
 				obje.hizAta(dx, 1.0f);
 			}
-			if (konum.y < particleSize || konum.y + particleSize > window_size) { // Üstten/alttan sekme
+			if (konum.y < particleSize || konum.y + particleSize > window_size) { 
 				if (konum.y < particleSize) gecici_konum.y = particleSize;
 				if (konum.y + particleSize > window_size) gecici_konum.y = window_size - particleSize;
 				obje.konum = gecici_konum;
